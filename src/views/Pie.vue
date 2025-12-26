@@ -2,7 +2,7 @@
   <div class="chart-container">
     <div class="desc">
       <h3>图表需求</h3>
-      <p>用饼状图展示不同工序合格率。</p>
+      <p>编写Vue工程代码，请求JSON数据，用饼状图展示不同工序合格率。</p>
       <ul>
         <li>展示图表标题</li>
         <li>为图表添加提示信息</li>
@@ -17,58 +17,79 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import * as echarts from 'echarts';
+import { ref, onMounted, onUnmounted } from 'vue'
+import * as echarts from 'echarts'
+import $ from 'jquery'
 
-const chartRef = ref(null);
-let myChart = null;
+const chartRef = ref(null)
+let myChart = null
 
 onMounted(() => {
-  myChart = echarts.init(chartRef.value);
+  myChart = echarts.init(chartRef.value)
 
-  const option = {
-    title: { text: '不同工序合格率', left: 'center' },
-    tooltip: { trigger: 'item', formatter: '{a} <br/>{b} : {c} ({d}%)' },
-    legend: { orient: 'vertical', left: 'right' },
-    series: [
-      {
-        name: '合格率',
-        type: 'pie',
-        radius: '60%',
-        data: [
-          { value: 1048, name: 'QC' },
-          { value: 735, name: '封胶' },
-          { value: 580, name: '测试' },
-          { value: 484, name: '焊线' },
-          { value: 300, name: '贴片' }
-        ],
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
-          }
-        },
-        label: {
-          show: true,
-          formatter: '{b} : {d}%'
-        }
+  // 请求 pie.json 数据
+  $.get('/pie.json', function (res) {
+    // 利用循环处理数据
+    let pieData = []
+    if (res.list && res.list.length > 0) {
+      for (let i = 0; i < res.list.length; i++) {
+        pieData.push({
+          name: res.list[i].production,
+          value: res.list[i].value,
+        })
       }
-    ]
-  };
+    }
 
-  myChart.setOption(option);
-  window.addEventListener('resize', () => myChart.resize());
-});
+    const option = {
+      title: { text: '不同工序合格率', left: 'center' },
+      tooltip: { trigger: 'item', formatter: '{a} <br/>{b} : {c} ({d}%)' },
+      legend: { orient: 'vertical', left: 'right' },
+      series: [
+        {
+          name: '合格率',
+          type: 'pie',
+          radius: '60%', // 半径60%
+          data: pieData, // 动态渲染数据
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)',
+            },
+          },
+          label: {
+            show: true,
+            formatter: '{b} : {d}%',
+          },
+        },
+      ],
+    }
+    myChart.setOption(option)
+  })
+
+  window.addEventListener('resize', () => myChart && myChart.resize())
+})
 
 onUnmounted(() => {
-  if(myChart) myChart.dispose();
-});
+  if (myChart) myChart.dispose()
+})
 </script>
 
 <style scoped>
-.chart-container { display: flex; width: 1200px; }
-.desc { width: 400px; padding-right: 20px; }
-.chart-box { width: 800px; height: 400px; }
-ul { padding-left: 20px; line-height: 2; }
+.chart-container {
+  display: flex;
+  width: 1200px;
+}
+.desc {
+  width: 400px;
+  padding-right: 20px;
+}
+.chart-box {
+  width: 800px;
+  height: 400px;
+}
+ul {
+  padding-left: 20px;
+  line-height: 2;
+}
 </style>

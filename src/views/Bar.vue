@@ -3,7 +3,7 @@
     <div class="desc">
       <h3>图表需求</h3>
       <p>
-        编写Vue工程代码，用簇状条形图展示各状态设备的投入量、产出量及订单量。
+        编写Vue工程代码，请求JSON数据，用簇状条形图展示各状态设备的投入量、产出量及订单量。
       </p>
       <ul>
         <li>展示图表标题</li>
@@ -21,6 +21,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import * as echarts from 'echarts'
+import $ from 'jquery' // 引入jQuery
 
 const chartRef = ref(null)
 let myChart = null
@@ -28,74 +29,70 @@ let myChart = null
 onMounted(() => {
   myChart = echarts.init(chartRef.value)
 
-  const data = {
-    categories: ['首检', '生产', '未排查', '故障处理'],
-    input: [5802, 9000, 6500, 11897],
-    output: [11000, 16000, 12000, 23891],
-    orders: [9000, 15000, 11095, 21095],
-  }
+  // 请求 bar.json 数据
+  $.get('/bar.json', function (data) {
+    const option = {
+      title: {
+        text: '各状态设备的投入量、产出量及订单量',
+        top: '10px',
+      },
+      tooltip: {
+        trigger: 'axis',
+      },
+      legend: {
+        data: ['投入量', '产出量', '订单量'],
+        right: '10%',
+        top: '50px',
+      },
+      grid: {
+        top: '120px',
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true,
+      },
+      xAxis: {
+        type: 'value',
+      },
+      yAxis: {
+        type: 'category',
+        data: data.state, // 动态渲染Y轴分类
+      },
+      series: [
+        {
+          name: '投入量',
+          type: 'bar',
+          data: data.data1, // 动态渲染投入量
+          markPoint: {
+            data: [
+              { type: 'max', name: 'Max' },
+              { type: 'min', name: 'Min' },
+            ],
+          },
+        },
+        {
+          name: '产出量',
+          type: 'bar',
+          data: data.data2, // 动态渲染产出量
+          markLine: {
+            data: [{ type: 'average', name: 'Avg' }],
+          },
+        },
+        {
+          name: '订单量',
+          type: 'bar',
+          data: data.data3, // 动态渲染订单量
+          showBackground: true,
+          backgroundStyle: {
+            color: 'rgba(180, 180, 180, 0.2)',
+          },
+        },
+      ],
+    }
+    myChart.setOption(option)
+  })
 
-  const option = {
-    title: {
-      text: '各状态设备的投入量、产出量及订单量',
-      top: '10px',
-    },
-    tooltip: {
-      trigger: 'axis',
-    },
-    legend: {
-      data: ['投入量', '产出量', '订单量'],
-      right: '10%',
-      top: '50px',
-    },
-    grid: {
-      top: '120px',
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      containLabel: true,
-    },
-    xAxis: {
-      type: 'value',
-    },
-    yAxis: {
-      type: 'category',
-      data: data.categories,
-    },
-    series: [
-      {
-        name: '投入量',
-        type: 'bar',
-        data: data.input,
-        markPoint: {
-          data: [
-            { type: 'max', name: 'Max' },
-            { type: 'min', name: 'Min' },
-          ],
-        },
-      },
-      {
-        name: '产出量',
-        type: 'bar',
-        data: data.output,
-        markLine: {
-          data: [{ type: 'average', name: 'Avg' }],
-        },
-      },
-      {
-        name: '订单量',
-        type: 'bar',
-        data: data.orders,
-        showBackground: true,
-        backgroundStyle: {
-          color: 'rgba(180, 180, 180, 0.2)',
-        },
-      },
-    ],
-  }
-
-  myChart.setOption(option)
-  window.addEventListener('resize', () => myChart.resize())
+  window.addEventListener('resize', () => myChart && myChart.resize())
 })
 
 onUnmounted(() => {
