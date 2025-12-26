@@ -1,0 +1,9 @@
+{
+	"list": [
+		{"production":"QC","value":"86.33"},
+		{"production":"封胶","value":"60.48"},
+		{"production":"测试","value":"31.84"},
+		{"production":"焊线","value":"85.93"},
+		{"production":"贴片","value":"95.97"}
+	]
+}
