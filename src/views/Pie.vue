@@ -29,13 +29,27 @@ onMounted(() => {
 
   // 请求 pie.json 数据
   $.get('/pie.json', function (res) {
+    // 定义颜色映射字典
+    const colorMap = {
+      QC: '#5470c6',
+      封胶: '#91cc75',
+      测试: '#fac858',
+      焊线: '#ee6666',
+      贴片: '#0ca8df',
+    }
+
     // 利用循环处理数据
     let pieData = []
     if (res.list && res.list.length > 0) {
       for (let i = 0; i < res.list.length; i++) {
+        let name = res.list[i].production
+
         pieData.push({
-          name: res.list[i].production,
+          name: name,
           value: res.list[i].value,
+          itemStyle: {
+            color: colorMap[name],
+          },
         })
       }
     }
@@ -49,7 +63,7 @@ onMounted(() => {
           name: '合格率',
           type: 'pie',
           radius: '60%', // 半径60%
-          data: pieData, // 动态渲染数据
+          data: pieData, // 动态渲染数据（包含颜色配置）
           emphasis: {
             itemStyle: {
               shadowBlur: 10,

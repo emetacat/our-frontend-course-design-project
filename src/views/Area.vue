@@ -69,6 +69,9 @@ onMounted(() => {
           areaStyle: {},
           emphasis: { focus: 'series' },
           data: data.data1, // 动态渲染 DS-01
+          itemStyle: {
+            color: '#879bd7',
+          },
         },
         {
           name: 'DS-02',
@@ -77,6 +80,9 @@ onMounted(() => {
           areaStyle: {},
           emphasis: { focus: 'series' },
           data: data.data2, // 动态渲染 DS-02
+          itemStyle: {
+            color: '#b2db9e',
+          },
         },
         {
           name: 'DS-03',
@@ -85,6 +91,9 @@ onMounted(() => {
           areaStyle: {},
           emphasis: { focus: 'series' },
           data: data.data3, // 动态渲染 DS-03
+          itemStyle: {
+            color: '#fbd88a',
+          },
         },
         {
           name: 'DS-04',
@@ -93,6 +102,9 @@ onMounted(() => {
           areaStyle: {},
           emphasis: { focus: 'series' },
           data: data.data4, // 动态渲染 DS-04
+          itemStyle: {
+            color: '#f39494',
+          },
         },
         {
           name: 'DS-05',
@@ -101,6 +113,9 @@ onMounted(() => {
           areaStyle: {},
           emphasis: { focus: 'series' },
           data: data.data5, // 动态渲染 DS-05
+          itemStyle: {
+            color: '#9dd3e8',
+          },
         },
       ],
     }

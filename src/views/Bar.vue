@@ -63,6 +63,9 @@ onMounted(() => {
           name: '投入量',
           type: 'bar',
           data: data.data1, // 动态渲染投入量
+          itemStyle: {
+            color: '#5470c6',
+          },
           markPoint: {
             data: [
               { type: 'max', name: 'Max' },
@@ -74,6 +77,9 @@ onMounted(() => {
           name: '产出量',
           type: 'bar',
           data: data.data2, // 动态渲染产出量
+          itemStyle: {
+            color: '#91cc75',
+          },
           markLine: {
             data: [{ type: 'average', name: 'Avg' }],
           },
@@ -82,6 +88,9 @@ onMounted(() => {
           name: '订单量',
           type: 'bar',
           data: data.data3, // 动态渲染订单量
+          itemStyle: {
+            color: '#fac858',
+          },
           showBackground: true,
           backgroundStyle: {
             color: 'rgba(180, 180, 180, 0.2)',
