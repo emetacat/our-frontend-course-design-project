@@ -15,103 +15,115 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import * as echarts from 'echarts';
+import { ref, onMounted, onUnmounted } from 'vue'
+import * as echarts from 'echarts'
 
-const chartRef = ref(null);
-let myChart = null;
+const chartRef = ref(null)
+let myChart = null
 
 onMounted(() => {
-  myChart = echarts.init(chartRef.value);
+  myChart = echarts.init(chartRef.value)
 
   const option = {
-    title: { 
+    title: {
       text: 'DS-01到DS-05五个设备一周的产出量',
-      top: '10px'
+      top: '10px',
     },
     tooltip: {
       trigger: 'axis',
-      axisPointer: { 
-        type: 'cross', 
-        label: { backgroundColor: '#6a7985' } 
-      }
+      axisPointer: {
+        type: 'cross',
+        label: { backgroundColor: '#6a7985' },
+      },
     },
     legend: {
       data: ['DS-01', 'DS-02', 'DS-03', 'DS-04', 'DS-05'],
-      right: '10%', 
-      top: '50px' // 图例下移
+      right: '10%',
+      top: '50px',
     },
-    grid: { 
-      top: '120px', // 留出足够空间给标题和图例
-      left: '3%', 
-      right: '4%', 
-      bottom: '3%', 
-      containLabel: true 
+    grid: {
+      top: '120px',
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true,
     },
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+      data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
     },
-    yAxis: { 
-      type: 'value' 
+    yAxis: {
+      type: 'value',
     },
     series: [
-      { 
-        name: 'DS-01', 
-        type: 'line', 
-        stack: 'Total', 
-        areaStyle: {}, 
-        emphasis: { focus: 'series' }, // 高亮淡出其他
-        data: [120, 132, 101, 134, 90, 230, 210] 
+      {
+        name: 'DS-01',
+        type: 'line',
+        stack: 'Total',
+        areaStyle: {},
+        emphasis: { focus: 'series' },
+        data: [120, 132, 101, 134, 90, 230, 210],
       },
-      { 
-        name: 'DS-02', 
-        type: 'line', 
-        stack: 'Total', 
-        areaStyle: {}, 
-        emphasis: { focus: 'series' }, 
-        data: [220, 182, 191, 234, 290, 330, 310] 
+      {
+        name: 'DS-02',
+        type: 'line',
+        stack: 'Total',
+        areaStyle: {},
+        emphasis: { focus: 'series' },
+        data: [220, 182, 191, 234, 290, 330, 310],
       },
-      { 
-        name: 'DS-03', 
-        type: 'line', 
-        stack: 'Total', 
-        areaStyle: {}, 
-        emphasis: { focus: 'series' }, 
-        data: [150, 232, 201, 154, 190, 330, 410] 
+      {
+        name: 'DS-03',
+        type: 'line',
+        stack: 'Total',
+        areaStyle: {},
+        emphasis: { focus: 'series' },
+        data: [150, 232, 201, 154, 190, 330, 410],
       },
-      { 
-        name: 'DS-04', 
-        type: 'line', 
-        stack: 'Total', 
-        areaStyle: {}, 
-        emphasis: { focus: 'series' }, 
-        data: [320, 332, 301, 334, 390, 330, 320] 
+      {
+        name: 'DS-04',
+        type: 'line',
+        stack: 'Total',
+        areaStyle: {},
+        emphasis: { focus: 'series' },
+        data: [320, 332, 301, 334, 390, 330, 320],
       },
-      { 
-        name: 'DS-05', 
-        type: 'line', 
-        stack: 'Total', 
-        areaStyle: {}, 
-        emphasis: { focus: 'series' }, 
-        data: [820, 932, 901, 934, 1290, 1330, 1320] 
-      }
-    ]
-  };
+      {
+        name: 'DS-05',
+        type: 'line',
+        stack: 'Total',
+        areaStyle: {},
+        emphasis: { focus: 'series' },
+        data: [820, 932, 901, 934, 1290, 1330, 1320],
+      },
+    ],
+  }
 
-  myChart.setOption(option);
-  window.addEventListener('resize', () => myChart.resize());
-});
+  myChart.setOption(option)
+  window.addEventListener('resize', () => myChart.resize())
+})
 
 onUnmounted(() => {
-  if(myChart) myChart.dispose();
-});
+  if (myChart) myChart.dispose()
+})
 </script>
 
 <style scoped>
-.chart-container { display: flex; width: 1200px; }
-.desc { width: 400px; padding-right: 20px; }
-.chart-box { width: 800px; height: 400px; }
-ul { padding-left: 20px; line-height: 2; }
+.chart-container {
+  display: flex;
+  width: 1200px;
+}
+.desc {
+  width: 400px;
+  padding-right: 20px;
+}
+.chart-box {
+  width: 800px;
+  height: 400px;
+}
+ul {
+  padding-left: 20px;
+  line-height: 2;
+}
 </style>
