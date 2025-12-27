@@ -1,12 +1,13 @@
 <template>
   <div class="page-container">
+    <h1 class="print-only-title">设备产量面积图报表</h1>
     <div class="control-panel">
       <h3>设备产量面积图分析</h3>
       <div class="actions">
         <button class="btn btn-primary" @click="exportToExcel">
           📥 导出 Excel
         </button>
-        <button class="btn btn-secondary" @click="printChart">
+        <button class="btn btn-secondary" @click="handlePrint">
           🖨️ 打印报表
         </button>
       </div>
@@ -32,7 +33,6 @@ let chartData = null
 
 const exportToExcel = () => {
   if (!chartData) return
-  // 面积图数据结构较为复杂，需要转置
   const header = ['日期', 'DS-01', 'DS-02', 'DS-03', 'DS-04', 'DS-05']
   const body = chartData.time.map((t, i) => [
     t,
@@ -42,14 +42,38 @@ const exportToExcel = () => {
     chartData.data4[i],
     chartData.data5[i],
   ])
-
   const ws = XLSX.utils.aoa_to_sheet([header, ...body])
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, 'Sheet1')
   XLSX.writeFile(wb, '设备产量趋势.xlsx')
 }
 
-const printChart = () => window.print()
+const handlePrint = () => {
+  if (!myChart) return
+  myChart.setOption({
+    backgroundColor: '#ffffff',
+    legend: { textStyle: { color: '#000000' } },
+    xAxis: { axisLabel: { color: '#000000' } },
+    yAxis: {
+      axisLabel: { color: '#000000' },
+      splitLine: { lineStyle: { color: '#cccccc' } },
+    },
+  })
+  setTimeout(() => window.print(), 300)
+}
+
+const revertChartTheme = () => {
+  if (!myChart) return
+  myChart.setOption({
+    backgroundColor: 'transparent',
+    legend: { textStyle: { color: '#e2e8f0' } },
+    xAxis: { axisLabel: { color: '#cbd5e1' } },
+    yAxis: {
+      axisLabel: { color: '#cbd5e1' },
+      splitLine: { lineStyle: { color: '#334155' } },
+    },
+  })
+}
 
 onMounted(() => {
   myChart = echarts.init(chartRef.value, 'dark')
@@ -57,10 +81,7 @@ onMounted(() => {
     chartData = data
     const option = {
       backgroundColor: 'transparent',
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: { type: 'cross', label: { backgroundColor: '#6a7985' } },
-      },
+      tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
       legend: {
         data: ['DS-01', 'DS-02', 'DS-03', 'DS-04', 'DS-05'],
         top: 10,
@@ -84,7 +105,6 @@ onMounted(() => {
           type: 'line',
           stack: 'Total',
           areaStyle: {},
-          emphasis: { focus: 'series' },
           data: data.data1,
           itemStyle: { color: '#879bd7' },
         },
@@ -93,7 +113,6 @@ onMounted(() => {
           type: 'line',
           stack: 'Total',
           areaStyle: {},
-          emphasis: { focus: 'series' },
           data: data.data2,
           itemStyle: { color: '#b2db9e' },
         },
@@ -102,7 +121,6 @@ onMounted(() => {
           type: 'line',
           stack: 'Total',
           areaStyle: {},
-          emphasis: { focus: 'series' },
           data: data.data3,
           itemStyle: { color: '#fbd88a' },
         },
@@ -111,7 +129,6 @@ onMounted(() => {
           type: 'line',
           stack: 'Total',
           areaStyle: {},
-          emphasis: { focus: 'series' },
           data: data.data4,
           itemStyle: { color: '#f39494' },
         },
@@ -120,7 +137,6 @@ onMounted(() => {
           type: 'line',
           stack: 'Total',
           areaStyle: {},
-          emphasis: { focus: 'series' },
           data: data.data5,
           itemStyle: { color: '#9dd3e8' },
         },
@@ -129,15 +145,17 @@ onMounted(() => {
     myChart.setOption(option)
   })
   window.addEventListener('resize', () => myChart && myChart.resize())
+  window.addEventListener('afterprint', revertChartTheme)
 })
 
 onUnmounted(() => {
   if (myChart) myChart.dispose()
+  window.removeEventListener('afterprint', revertChartTheme)
 })
 </script>
 
 <style scoped>
-/* 复用 Bar.vue 的 CSS 样式 */
+/* 样式与 Bar.vue 相同 */
 .page-container {
   display: flex;
   flex-direction: column;
@@ -171,11 +189,11 @@ onUnmounted(() => {
   cursor: pointer;
   font-weight: bold;
   font-size: 0.9rem;
+  color: white;
   transition: all 0.2s;
   display: flex;
   align-items: center;
   gap: 5px;
-  color: white;
 }
 .btn-primary {
   background-color: #0ca8df;
@@ -211,18 +229,8 @@ onUnmounted(() => {
   width: 100%;
   min-height: 350px;
 }
-@media print {
-  .control-panel,
-  .chart-desc {
-    display: none;
-  }
-  .chart-wrapper {
-    border: none;
-    background: white;
-  }
-  .chart-box {
-    min-height: 600px;
-  }
+.print-only-title {
+  display: none;
 }
 @media screen and (max-width: 768px) {
   .control-panel {

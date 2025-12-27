@@ -1,12 +1,14 @@
 <template>
   <div class="page-container">
+    <h1 class="print-only-title">簇状条形图报表</h1>
+
     <div class="control-panel">
       <h3>簇状条形图数据分析</h3>
       <div class="actions">
         <button class="btn btn-primary" @click="exportToExcel">
           📥 导出 Excel
         </button>
-        <button class="btn btn-secondary" @click="printChart">
+        <button class="btn btn-secondary" @click="handlePrint">
           🖨️ 打印报表
         </button>
       </div>
@@ -31,10 +33,9 @@ const chartRef = ref(null)
 let myChart = null
 let chartData = null
 
-// --- 导出功能 ---
+// Excel 导出
 const exportToExcel = () => {
   if (!chartData) return
-  // 构建二维数组
   const wsData = [
     ['设备状态', '投入量', '产出量', '订单量'],
     ...chartData.state.map((item, index) => [
@@ -50,17 +51,50 @@ const exportToExcel = () => {
   XLSX.writeFile(wb, '簇状条形图数据.xlsx')
 }
 
-// --- 打印功能 ---
-const printChart = () => {
-  window.print()
+// 打印功能：动态切换亮色/暗色主题
+const handlePrint = () => {
+  if (!myChart) return
+  // 切换为打印模式（白底黑字）
+  myChart.setOption({
+    backgroundColor: '#ffffff',
+    legend: { textStyle: { color: '#000000' } },
+    xAxis: {
+      axisLabel: { color: '#000000' },
+      splitLine: { lineStyle: { color: '#cccccc' } },
+    },
+    yAxis: {
+      axisLabel: { color: '#000000' },
+    },
+  })
+
+  // 延时等待渲染后打印
+  setTimeout(() => {
+    window.print()
+    // 恢复深色模式（通常在打印窗口关闭后触发，但为了保险起见，这里也调用一次，
+    // 配合 window.addEventListener("afterprint") 双重保障）
+  }, 300)
+}
+
+const revertChartTheme = () => {
+  if (!myChart) return
+  myChart.setOption({
+    backgroundColor: 'transparent',
+    legend: { textStyle: { color: '#e2e8f0' } },
+    xAxis: {
+      axisLabel: { color: '#cbd5e1' },
+      splitLine: { lineStyle: { color: '#334155' } },
+    },
+    yAxis: {
+      axisLabel: { color: '#cbd5e1' },
+    },
+  })
 }
 
 onMounted(() => {
   myChart = echarts.init(chartRef.value, 'dark')
 
   $.get('/bar.json', function (data) {
-    chartData = data // 保存数据供导出使用
-
+    chartData = data
     const option = {
       backgroundColor: 'transparent',
       tooltip: { trigger: 'axis' },
@@ -91,23 +125,13 @@ onMounted(() => {
           name: '投入量',
           type: 'bar',
           data: data.data1,
-          itemStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-              { offset: 0, color: '#3b82f6' },
-              { offset: 1, color: '#60a5fa' },
-            ]),
-          },
+          itemStyle: { color: '#3b82f6' },
         },
         {
           name: '产出量',
           type: 'bar',
           data: data.data2,
-          itemStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-              { offset: 0, color: '#10b981' },
-              { offset: 1, color: '#34d399' },
-            ]),
-          },
+          itemStyle: { color: '#10b981' },
         },
         {
           name: '订单量',
@@ -121,21 +145,23 @@ onMounted(() => {
   })
 
   window.addEventListener('resize', () => myChart && myChart.resize())
+  window.addEventListener('afterprint', revertChartTheme) // 监听打印结束
 })
 
 onUnmounted(() => {
   if (myChart) myChart.dispose()
+  window.removeEventListener('afterprint', revertChartTheme)
 })
 </script>
 
 <style scoped>
+/* 页面样式 */
 .page-container {
   display: flex;
   flex-direction: column;
   gap: 20px;
   height: 100%;
 }
-
 .control-panel {
   display: flex;
   justify-content: space-between;
@@ -147,18 +173,15 @@ onUnmounted(() => {
   flex-wrap: wrap;
   gap: 10px;
 }
-
 .control-panel h3 {
   margin: 0;
   color: #0ca8df;
   font-size: 1.1rem;
 }
-
 .actions {
   display: flex;
   gap: 10px;
 }
-
 .btn {
   border: none;
   padding: 8px 16px;
@@ -166,27 +189,24 @@ onUnmounted(() => {
   cursor: pointer;
   font-weight: bold;
   font-size: 0.9rem;
+  color: white;
   transition: all 0.2s;
   display: flex;
   align-items: center;
   gap: 5px;
-  color: white;
 }
-
 .btn-primary {
   background-color: #0ca8df;
 }
 .btn-primary:hover {
   background-color: #0284c7;
 }
-
 .btn-secondary {
   background-color: #475569;
 }
 .btn-secondary:hover {
   background-color: #334155;
 }
-
 .chart-wrapper {
   flex: 1;
   background: rgba(30, 41, 59, 0.6);
@@ -197,7 +217,6 @@ onUnmounted(() => {
   flex-direction: column;
   min-height: 400px;
 }
-
 .chart-desc {
   margin-bottom: 15px;
   color: #94a3b8;
@@ -205,26 +224,15 @@ onUnmounted(() => {
   border-left: 3px solid #0ca8df;
   padding-left: 10px;
 }
-
 .chart-box {
   flex: 1;
   width: 100%;
   min-height: 350px;
 }
 
-/* 打印适配 */
-@media print {
-  .control-panel,
-  .chart-desc {
-    display: none;
-  }
-  .chart-wrapper {
-    border: none;
-    background: white;
-  }
-  .chart-box {
-    min-height: 600px;
-  }
+/* 默认隐藏打印标题 */
+.print-only-title {
+  display: none;
 }
 
 /* 移动端适配 */

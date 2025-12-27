@@ -1,12 +1,13 @@
 <template>
   <div class="page-container">
+    <h1 class="print-only-title">工序合格率报表</h1>
     <div class="control-panel">
       <h3>工序合格率分析</h3>
       <div class="actions">
         <button class="btn btn-primary" @click="exportToExcel">
           📥 导出 Excel
         </button>
-        <button class="btn btn-secondary" @click="printChart">
+        <button class="btn btn-secondary" @click="handlePrint">
           🖨️ 打印报表
         </button>
       </div>
@@ -42,7 +43,24 @@ const exportToExcel = () => {
   XLSX.writeFile(wb, '工序合格率.xlsx')
 }
 
-const printChart = () => window.print()
+const handlePrint = () => {
+  if (!myChart) return
+  myChart.setOption({
+    backgroundColor: '#ffffff',
+    legend: { textStyle: { color: '#000000' } },
+    series: [{ label: { color: '#000000' } }],
+  })
+  setTimeout(() => window.print(), 300)
+}
+
+const revertChartTheme = () => {
+  if (!myChart) return
+  myChart.setOption({
+    backgroundColor: 'transparent',
+    legend: { textStyle: { color: '#e2e8f0' } },
+    series: [{ label: { color: '#fff' } }],
+  })
+}
 
 onMounted(() => {
   myChart = echarts.init(chartRef.value, 'dark')
@@ -75,13 +93,6 @@ onMounted(() => {
           type: 'pie',
           radius: '60%',
           data: pieData,
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)',
-            },
-          },
           label: { show: true, formatter: '{b} : {d}%', color: '#fff' },
         },
       ],
@@ -89,15 +100,17 @@ onMounted(() => {
     myChart.setOption(option)
   })
   window.addEventListener('resize', () => myChart && myChart.resize())
+  window.addEventListener('afterprint', revertChartTheme)
 })
 
 onUnmounted(() => {
   if (myChart) myChart.dispose()
+  window.removeEventListener('afterprint', revertChartTheme)
 })
 </script>
 
 <style scoped>
-/* 复用 Bar.vue 的 CSS 样式 */
+/* 同样复用样式 */
 .page-container {
   display: flex;
   flex-direction: column;
@@ -131,11 +144,11 @@ onUnmounted(() => {
   cursor: pointer;
   font-weight: bold;
   font-size: 0.9rem;
+  color: white;
   transition: all 0.2s;
   display: flex;
   align-items: center;
   gap: 5px;
-  color: white;
 }
 .btn-primary {
   background-color: #0ca8df;
@@ -171,18 +184,8 @@ onUnmounted(() => {
   width: 100%;
   min-height: 350px;
 }
-@media print {
-  .control-panel,
-  .chart-desc {
-    display: none;
-  }
-  .chart-wrapper {
-    border: none;
-    background: white;
-  }
-  .chart-box {
-    min-height: 600px;
-  }
+.print-only-title {
+  display: none;
 }
 @media screen and (max-width: 768px) {
   .control-panel {

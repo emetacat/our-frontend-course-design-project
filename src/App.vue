@@ -66,13 +66,12 @@ onUnmounted(() => {
 </script>
 
 <style>
-/* 全局重置与基础样式 */
+/* 全局变量与基础样式 */
 :root {
   --bg-color: #0b1120;
   --sidebar-bg: #1e293b;
   --text-primary: #e2e8f0;
   --accent-color: #0ca8df;
-  --accent-hover: #38bdf8;
   --border-color: #334155;
 }
 
@@ -82,10 +81,9 @@ body {
   color: var(--text-primary);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   overflow-x: hidden;
-  -webkit-tap-highlight-color: transparent; /* 移动端点击高亮去除 */
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* 布局容器 */
 .app-wrapper {
   display: flex;
   flex-direction: column;
@@ -113,7 +111,6 @@ body {
   font-weight: bold;
   color: var(--accent-color);
   text-shadow: 0 0 10px rgba(12, 168, 223, 0.4);
-  white-space: nowrap;
 }
 
 .version {
@@ -132,15 +129,15 @@ body {
   font-size: 0.9rem;
 }
 
-/* 主内容区布局 */
+/* 主布局 */
 .main-content {
   display: flex;
   flex: 1;
-  overflow: hidden; /* 防止双滚动条 */
+  overflow: hidden;
   position: relative;
 }
 
-/* 侧边导航栏 */
+/* 侧边导航 */
 .sidebar {
   width: 220px;
   background-color: var(--sidebar-bg);
@@ -174,37 +171,21 @@ body {
   background-color: rgba(51, 65, 85, 0.5);
   color: #fff;
   border-left-color: var(--accent-color);
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
 }
 
-/* 内容显示区 */
+/* 内容区 */
 .content-view {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
   background-image: linear-gradient(rgba(30, 41, 59, 0.3) 1px, transparent 1px),
     linear-gradient(90deg, rgba(30, 41, 59, 0.3) 1px, transparent 1px);
-  background-size: 20px 20px; /* 科技感网格背景 */
+  background-size: 20px 20px;
   background-color: #0b1120;
 }
 
-/* 路由切换动画 */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-/* ===== 移动端适配 Media Queries ===== */
+/* 移动端适配 */
 @media screen and (max-width: 768px) {
-  .app-wrapper {
-    height: 100vh; /* 确保移动端全屏 */
-  }
-
-  /* 顶部栏调整 */
   .header {
     height: 50px;
     padding: 0 10px;
@@ -212,48 +193,92 @@ body {
   .logo {
     font-size: 1rem;
   }
-  .version {
-    display: none;
-  } /* 小屏隐藏版本号 */
+  .version,
   .time {
     display: none;
-  } /* 小屏隐藏时间节省空间 */
-
-  /* 主布局改为垂直方向 */
+  }
   .main-content {
     flex-direction: column;
   }
-
-  /* 导航栏变为顶部横向滚动 */
   .sidebar {
     width: 100%;
     height: auto;
     flex-direction: row;
-    overflow-x: auto; /* 允许横向滚动 */
+    overflow-x: auto;
     padding: 0;
     border-right: none;
     border-bottom: 1px solid var(--border-color);
     background: #151e2e;
   }
-
   .nav-item {
-    flex: 0 0 auto; /* 防止压缩 */
+    flex: 0 0 auto;
     padding: 12px 15px;
     border-left: none;
     border-bottom: 3px solid transparent;
-    font-size: 0.9rem;
   }
-
   .nav-item:hover,
   .nav-item.router-link-active {
-    background-color: transparent;
-    border-left-color: transparent;
+    background: transparent;
     border-bottom-color: var(--accent-color);
   }
+}
 
-  /* 内容区内边距减小 */
+/* ========== 打印专用样式 ========== */
+@media print {
+  /* 隐藏所有不相关元素 */
+  .header, 
+  .sidebar, 
+  .control-panel, /* 页面内的按钮栏 */
+  .chart-desc     /* 页面内的说明文字 */ {
+    display: none !important;
+  }
+
+  /* 强制重置背景和颜色 */
+  body,
+  html,
+  .app-wrapper,
+  .main-content,
   .content-view {
-    padding: 10px;
+    background: #ffffff !important;
+    color: #000000 !important;
+    height: auto !important;
+    width: 100% !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+
+  /* 图表容器调整 */
+  .page-container {
+    width: 100% !important;
+    display: block !important;
+  }
+
+  .chart-wrapper {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* 强制显示打印标题 */
+  .print-only-title {
+    display: block !important;
+    text-align: center;
+    font-size: 24pt;
+    font-weight: bold;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 15px;
+    color: #000 !important;
+  }
+
+  /* 确保图表高度适合打印A4纸 */
+  .chart-box {
+    height: 600px !important;
+    width: 100% !important;
   }
 }
 </style>
