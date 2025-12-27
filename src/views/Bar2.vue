@@ -31,6 +31,11 @@ const chartRef = ref(null)
 let myChart = null
 let chartData = null
 
+// --- 具名函数 ---
+const handleResize = () => {
+  if (myChart) myChart.resize()
+}
+
 const exportToExcel = () => {
   if (!chartData) return
   const wsData = [
@@ -117,18 +122,22 @@ onMounted(() => {
     }
     myChart.setOption(option)
   })
-  window.addEventListener('resize', () => myChart && myChart.resize())
+  window.addEventListener('resize', handleResize)
   window.addEventListener('afterprint', revertChartTheme)
 })
 
 onUnmounted(() => {
-  if (myChart) myChart.dispose()
+  window.removeEventListener('resize', handleResize)
   window.removeEventListener('afterprint', revertChartTheme)
+  if (myChart) {
+    myChart.dispose()
+    myChart = null
+  }
 })
 </script>
 
 <style scoped>
-/* 同样复用样式 */
+/* 样式同 Bar.vue */
 .page-container {
   display: flex;
   flex-direction: column;

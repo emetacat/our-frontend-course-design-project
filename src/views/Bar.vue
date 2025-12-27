@@ -33,6 +33,13 @@ const chartRef = ref(null)
 let myChart = null
 let chartData = null
 
+// --- 具名函数：处理窗口大小调整 ---
+const handleResize = () => {
+  if (myChart) {
+    myChart.resize()
+  }
+}
+
 // Excel 导出
 const exportToExcel = () => {
   if (!chartData) return
@@ -51,10 +58,9 @@ const exportToExcel = () => {
   XLSX.writeFile(wb, '簇状条形图数据.xlsx')
 }
 
-// 打印功能：动态切换亮色/暗色主题
+// 打印功能
 const handlePrint = () => {
   if (!myChart) return
-  // 切换为打印模式（白底黑字）
   myChart.setOption({
     backgroundColor: '#ffffff',
     legend: { textStyle: { color: '#000000' } },
@@ -67,11 +73,8 @@ const handlePrint = () => {
     },
   })
 
-  // 延时等待渲染后打印
   setTimeout(() => {
     window.print()
-    // 恢复深色模式（通常在打印窗口关闭后触发，但为了保险起见，这里也调用一次，
-    // 配合 window.addEventListener("afterprint") 双重保障）
   }, 300)
 }
 
@@ -144,18 +147,25 @@ onMounted(() => {
     myChart.setOption(option)
   })
 
-  window.addEventListener('resize', () => myChart && myChart.resize())
-  window.addEventListener('afterprint', revertChartTheme) // 监听打印结束
+  // 添加监听器（使用具名函数）
+  window.addEventListener('resize', handleResize)
+  window.addEventListener('afterprint', revertChartTheme)
 })
 
 onUnmounted(() => {
-  if (myChart) myChart.dispose()
+  // 移除监听器（重要！修复内存泄漏）
+  window.removeEventListener('resize', handleResize)
   window.removeEventListener('afterprint', revertChartTheme)
+
+  if (myChart) {
+    myChart.dispose()
+    myChart = null
+  }
 })
 </script>
 
 <style scoped>
-/* 页面样式 */
+/* 样式保持不变 */
 .page-container {
   display: flex;
   flex-direction: column;
@@ -229,13 +239,9 @@ onUnmounted(() => {
   width: 100%;
   min-height: 350px;
 }
-
-/* 默认隐藏打印标题 */
 .print-only-title {
   display: none;
 }
-
-/* 移动端适配 */
 @media screen and (max-width: 768px) {
   .control-panel {
     flex-direction: column;
