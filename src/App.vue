@@ -1,82 +1,259 @@
 <template>
-  <div class="container">
-    <div class="navigate">
-      <h3>Vue+ECharts实现工业制造行业数据可视化</h3>
-      <p>
-        随着工业技术的发展，数据量越来越大，为工业制造带来了无限的机遇与挑战。如何在海量数据中提起有价值的信息，使工业加速发展?这时，数据可视化应运而生，将统计数据以图表、图像、报表等形式呈现，使复杂的数据变得直观易懂，其主要体现在：原料采购分析、设备运行分析、生产进度监控、故障分析与改进、决策支持等。
-        <span>本项目主要实现如下五个图表：（点击导航可查看图表详情）</span>
-      </p>
-
-      <div class="nav-links">
-        <router-link to="/bar">簇状条形图</router-link>
-        <router-link to="/area">面积图</router-link>
-        <router-link to="/bar2">柱形图</router-link>
-        <router-link to="/pie">饼图</router-link>
-        <router-link to="/line">折线图</router-link>
+  <div class="app-wrapper">
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">
+          工业制造数据可视化平台 <span class="version">V2.0 PRO</span>
+        </div>
       </div>
-    </div>
+      <div class="header-right">
+        <div class="time">{{ currentTime }}</div>
+      </div>
+    </header>
 
-    <div class="pages">
-      <router-view></router-view>
+    <div class="main-content">
+      <nav class="sidebar">
+        <router-link to="/dashboard" class="nav-item">
+          <span class="icon">📊</span> <span class="text">综合看板</span>
+        </router-link>
+        <router-link to="/bar" class="nav-item">
+          <span class="icon">📈</span> <span class="text">簇状条形图</span>
+        </router-link>
+        <router-link to="/area" class="nav-item">
+          <span class="icon">📉</span> <span class="text">面积图</span>
+        </router-link>
+        <router-link to="/bar2" class="nav-item">
+          <span class="icon">📊</span> <span class="text">柱形图</span>
+        </router-link>
+        <router-link to="/pie" class="nav-item">
+          <span class="icon">🥧</span> <span class="text">饼图</span>
+        </router-link>
+        <router-link to="/line" class="nav-item">
+          <span class="icon">📉</span> <span class="text">折线图</span>
+        </router-link>
+      </nav>
+
+      <main class="content-view">
+        <router-view v-slot="{ Component }">
+          <transition name="fade" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
+      </main>
     </div>
   </div>
 </template>
 
-<style scoped>
-.container {
-  font-family: sans-serif;
-  padding: 20px;
-  min-width: 1300px;
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
+
+const currentTime = ref('')
+let timer = null
+
+const updateTime = () => {
+  const now = new Date()
+  currentTime.value = now.toLocaleString()
 }
 
-.navigate h3 {
-  text-align: center;
-  height: 64px;
-  line-height: 64px;
-  margin-bottom: 20px;
+onMounted(() => {
+  updateTime()
+  timer = setInterval(updateTime, 1000)
+})
+
+onUnmounted(() => {
+  clearInterval(timer)
+})
+</script>
+
+<style>
+/* 全局重置与基础样式 */
+:root {
+  --bg-color: #0b1120;
+  --sidebar-bg: #1e293b;
+  --text-primary: #e2e8f0;
+  --accent-color: #0ca8df;
+  --accent-hover: #38bdf8;
+  --border-color: #334155;
 }
 
-.navigate p {
-  width: 1280px;
-  margin: 0 auto 30px;
-  line-height: 1.6;
-  text-indent: 2em;
+body {
+  margin: 0;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent; /* 移动端点击高亮去除 */
 }
 
-.navigate p span {
-  color: #ff0000;
-  display: block;
-  margin-top: 10px;
-  text-indent: 0;
-}
-
-.nav-links {
+/* 布局容器 */
+.app-wrapper {
   display: flex;
-  width: 1280px;
-  margin: 0 auto 40px;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* 顶部栏 */
+.header {
+  height: 60px;
+  background: linear-gradient(90deg, #1e293b 0%, #0f172a 100%);
+  display: flex;
   justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 2px solid var(--accent-color);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  flex-shrink: 0;
 }
 
-.nav-links a {
-  display: block;
-  width: 120px;
-  height: 40px;
-  line-height: 40px;
-  background: #ddd;
-  text-align: center;
-  text-decoration: none;
-  color: #333;
+.logo {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--accent-color);
+  text-shadow: 0 0 10px rgba(12, 168, 223, 0.4);
+  white-space: nowrap;
 }
 
-.nav-links a:hover,
-.nav-links a.router-link-active {
-  color: #ff0000;
-  text-decoration: underline;
+.version {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-left: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
-.pages {
-  width: 100%;
+.time {
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+/* 主内容区布局 */
+.main-content {
   display: flex;
-  justify-content: center;
+  flex: 1;
+  overflow: hidden; /* 防止双滚动条 */
+  position: relative;
+}
+
+/* 侧边导航栏 */
+.sidebar {
+  width: 220px;
+  background-color: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  padding-top: 10px;
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.nav-item {
+  color: #94a3b8;
+  text-decoration: none;
+  padding: 15px 20px;
+  transition: all 0.3s;
+  border-left: 4px solid transparent;
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+}
+
+.nav-item .icon {
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+
+.nav-item:hover,
+.nav-item.router-link-active {
+  background-color: rgba(51, 65, 85, 0.5);
+  color: #fff;
+  border-left-color: var(--accent-color);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+/* 内容显示区 */
+.content-view {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background-image: linear-gradient(rgba(30, 41, 59, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 41, 59, 0.3) 1px, transparent 1px);
+  background-size: 20px 20px; /* 科技感网格背景 */
+  background-color: #0b1120;
+}
+
+/* 路由切换动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* ===== 移动端适配 Media Queries ===== */
+@media screen and (max-width: 768px) {
+  .app-wrapper {
+    height: 100vh; /* 确保移动端全屏 */
+  }
+
+  /* 顶部栏调整 */
+  .header {
+    height: 50px;
+    padding: 0 10px;
+  }
+  .logo {
+    font-size: 1rem;
+  }
+  .version {
+    display: none;
+  } /* 小屏隐藏版本号 */
+  .time {
+    display: none;
+  } /* 小屏隐藏时间节省空间 */
+
+  /* 主布局改为垂直方向 */
+  .main-content {
+    flex-direction: column;
+  }
+
+  /* 导航栏变为顶部横向滚动 */
+  .sidebar {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    overflow-x: auto; /* 允许横向滚动 */
+    padding: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    background: #151e2e;
+  }
+
+  .nav-item {
+    flex: 0 0 auto; /* 防止压缩 */
+    padding: 12px 15px;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    font-size: 0.9rem;
+  }
+
+  .nav-item:hover,
+  .nav-item.router-link-active {
+    background-color: transparent;
+    border-left-color: transparent;
+    border-bottom-color: var(--accent-color);
+  }
+
+  /* 内容区内边距减小 */
+  .content-view {
+    padding: 10px;
+  }
 }
 </style>

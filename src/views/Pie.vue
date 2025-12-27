@@ -1,18 +1,22 @@
 <template>
-  <div class="chart-container">
-    <div class="desc">
-      <h3>图表需求</h3>
-      <p>编写Vue工程代码，请求JSON数据，用饼状图展示不同工序合格率。</p>
-      <ul>
-        <li>展示图表标题</li>
-        <li>为图表添加提示信息</li>
-        <li>添加图例，并使其显示在右侧</li>
-        <li>设置饼图的半径为60%</li>
-        <li>鼠标交互时，为饼图添加灰色阴影</li>
-        <li>以百分比的格式显示饼图数据标签</li>
-      </ul>
+  <div class="page-container">
+    <div class="control-panel">
+      <h3>工序合格率分析</h3>
+      <div class="actions">
+        <button class="btn btn-primary" @click="exportToExcel">
+          📥 导出 Excel
+        </button>
+        <button class="btn btn-secondary" @click="printChart">
+          🖨️ 打印报表
+        </button>
+      </div>
     </div>
-    <div ref="chartRef" class="chart-box"></div>
+    <div class="chart-wrapper">
+      <div class="chart-desc">
+        <p><strong>质量监控：</strong>各工序合格率占比分布。</p>
+      </div>
+      <div ref="chartRef" class="chart-box"></div>
+    </div>
   </div>
 </template>
 
@@ -20,16 +24,30 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import * as echarts from 'echarts'
 import $ from 'jquery'
+import * as XLSX from 'xlsx'
 
 const chartRef = ref(null)
 let myChart = null
+let chartData = null
+
+const exportToExcel = () => {
+  if (!chartData || !chartData.list) return
+  const wsData = [
+    ['工序名称', '合格率(%)'],
+    ...chartData.list.map((item) => [item.production, item.value]),
+  ]
+  const ws = XLSX.utils.aoa_to_sheet(wsData)
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1')
+  XLSX.writeFile(wb, '工序合格率.xlsx')
+}
+
+const printChart = () => window.print()
 
 onMounted(() => {
-  myChart = echarts.init(chartRef.value)
-
-  // 请求 pie.json 数据
+  myChart = echarts.init(chartRef.value, 'dark')
   $.get('/pie.json', function (res) {
-    // 定义颜色映射字典
+    chartData = res
     const colorMap = {
       QC: '#5470c6',
       封胶: '#91cc75',
@@ -37,33 +55,26 @@ onMounted(() => {
       焊线: '#ee6666',
       贴片: '#0ca8df',
     }
-
-    // 利用循环处理数据
-    let pieData = []
-    if (res.list && res.list.length > 0) {
-      for (let i = 0; i < res.list.length; i++) {
-        let name = res.list[i].production
-
-        pieData.push({
-          name: name,
-          value: res.list[i].value,
-          itemStyle: {
-            color: colorMap[name],
-          },
-        })
-      }
-    }
+    const pieData = res.list.map((item) => ({
+      name: item.production,
+      value: item.value,
+      itemStyle: { color: colorMap[item.production] },
+    }))
 
     const option = {
-      title: { text: '不同工序合格率', left: 'center' },
+      backgroundColor: 'transparent',
       tooltip: { trigger: 'item', formatter: '{a} <br/>{b} : {c} ({d}%)' },
-      legend: { orient: 'vertical', left: 'right' },
+      legend: {
+        orient: 'vertical',
+        left: 'right',
+        textStyle: { color: '#e2e8f0' },
+      },
       series: [
         {
           name: '合格率',
           type: 'pie',
-          radius: '60%', // 半径60%
-          data: pieData, // 动态渲染数据（包含颜色配置）
+          radius: '60%',
+          data: pieData,
           emphasis: {
             itemStyle: {
               shadowBlur: 10,
@@ -71,16 +82,12 @@ onMounted(() => {
               shadowColor: 'rgba(0, 0, 0, 0.5)',
             },
           },
-          label: {
-            show: true,
-            formatter: '{b} : {d}%',
-          },
+          label: { show: true, formatter: '{b} : {d}%', color: '#fff' },
         },
       ],
     }
     myChart.setOption(option)
   })
-
   window.addEventListener('resize', () => myChart && myChart.resize())
 })
 
@@ -90,20 +97,112 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.chart-container {
+/* 复用 Bar.vue 的 CSS 样式 */
+.page-container {
   display: flex;
-  width: 1200px;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
 }
-.desc {
-  width: 400px;
-  padding-right: 20px;
+.control-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(30, 41, 59, 0.6);
+  padding: 15px 20px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.control-panel h3 {
+  margin: 0;
+  color: #0ca8df;
+  font-size: 1.1rem;
+}
+.actions {
+  display: flex;
+  gap: 10px;
+}
+.btn {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: white;
+}
+.btn-primary {
+  background-color: #0ca8df;
+}
+.btn-primary:hover {
+  background-color: #0284c7;
+}
+.btn-secondary {
+  background-color: #475569;
+}
+.btn-secondary:hover {
+  background-color: #334155;
+}
+.chart-wrapper {
+  flex: 1;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+}
+.chart-desc {
+  margin-bottom: 15px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  border-left: 3px solid #0ca8df;
+  padding-left: 10px;
 }
 .chart-box {
-  width: 800px;
-  height: 400px;
+  flex: 1;
+  width: 100%;
+  min-height: 350px;
 }
-ul {
-  padding-left: 20px;
-  line-height: 2;
+@media print {
+  .control-panel,
+  .chart-desc {
+    display: none;
+  }
+  .chart-wrapper {
+    border: none;
+    background: white;
+  }
+  .chart-box {
+    min-height: 600px;
+  }
+}
+@media screen and (max-width: 768px) {
+  .control-panel {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .actions {
+    width: 100%;
+    margin-top: 10px;
+  }
+  .btn {
+    flex: 1;
+    justify-content: center;
+    padding: 10px;
+  }
+  .chart-wrapper {
+    padding: 10px;
+  }
+  .chart-box {
+    min-height: 300px;
+  }
 }
 </style>
