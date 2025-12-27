@@ -153,7 +153,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // 移除监听器（重要！修复内存泄漏）
+  // 移除监听器（修复内存泄漏 Bug）
   window.removeEventListener('resize', handleResize)
   window.removeEventListener('afterprint', revertChartTheme)
 
@@ -165,7 +165,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 样式保持不变 */
 .page-container {
   display: flex;
   flex-direction: column;

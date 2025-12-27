@@ -164,7 +164,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 样式同 Bar.vue */
 .page-container {
   display: flex;
   flex-direction: column;

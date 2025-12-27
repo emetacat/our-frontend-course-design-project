@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import Dashboard from '../views/Dashboard.vue' // 新增
+import Dashboard from '../views/Dashboard.vue' // 扩展
 import Bar from '../views/Bar.vue'
 import Area from '../views/Area.vue'
 import Bar2 from '../views/Bar2.vue'
